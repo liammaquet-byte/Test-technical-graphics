@@ -17,10 +17,10 @@ const ctxs = Object.fromEntries(canvases.map(c=>[c.id,c.getContext('2d')]));
 function resize(){for(const c of canvases){const r=c.getBoundingClientRect();c.width=r.width*devicePixelRatio;c.height=r.height*devicePixelRatio;c.getContext('2d').setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)} draw();}
 addEventListener('resize',resize);
 function init(){
-  ['spx','spz','eye','pp','rot','objx','objz'].forEach(id=>$(id).addEventListener('input',readControls));
+  ['spx','spz','eye','pp','rot','objx','objz'].forEach(id=>$(id).oninput=readControls);
   $('spx').value=state.sp.x; $('spz').value=state.sp.z; $('eye').value=state.sp.y; $('pp').value=state.pp; $('rot').value=state.obj.rot; $('objx').value=state.obj.x; $('objz').value=state.obj.z;
-  ['rays','construct','grid','cone','parallel','curves'].forEach(id=>$(id).addEventListener('change',e=>{state.show[id]=e.target.checked;draw()}));
-  document.querySelectorAll('.seg').forEach(b=>b.onclick=()=>{document.querySelectorAll('.seg').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.mode=b.dataset.mode; if(state.mode==='one'){state.obj.rot=0;$('rot').value=0;} if(state.mode==='two' && Math.abs(state.obj.rot)<5){state.obj.rot=28;$('rot').value=28;} if(state.mode==='three' && Math.abs(state.obj.rot)<5){state.obj.rot=28;$('rot').value=28;} draw();});
+  ['rays','construct','grid','cone','parallel','curves'].forEach(id=>{ $(id).checked=state.show[id]; $(id).onchange=e=>{state.show[id]=e.target.checked;draw()}; });
+  document.querySelectorAll('.seg').forEach(b=>{b.classList.toggle('active', b.dataset.mode===state.mode); b.onclick=()=>{document.querySelectorAll('.seg').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.mode=b.dataset.mode; if(state.mode==='one'){state.obj.rot=0;$('rot').value=0;} if(state.mode==='two'){state.obj.rot=28;$('rot').value=28;} if(state.mode==='three'){state.obj.rot=28;$('rot').value=28;} draw();};});
   $('explainBtn').onclick=()=>{state.explain=!state.explain;$('explainBtn').textContent='Explain this line: '+(state.explain?'ON':'OFF');$('explainBtn').classList.toggle('active',state.explain)};
   $('resetBtn').onclick=()=>{Object.assign(state,{mode:'two',sp:{x:-4,y:3.2,z:-7},pp:0,obj:{x:0,y:0,z:5,rot:28},step:0});init();resize();};
   setupDrag(); resize();
@@ -35,7 +35,8 @@ function objectPoints(){
 function rotPt(p,cs,sn){return {x:state.obj.x+p.x*cs-p.z*sn,y:p.y,z:state.obj.z+p.x*sn+p.z*cs};}
 const edges=[[0,1],[0,2],[0,4],[3,1],[3,2],[3,7],[5,1],[5,4],[5,7],[6,2],[6,4],[6,7]];
 function project(p){const t=(state.pp-state.sp.z)/(p.z-state.sp.z);return {x:state.sp.x+t*(p.x-state.sp.x), y:state.sp.y+t*(p.y-state.sp.y), ok:t>0};}
-function mapPers(p,w,h){const scale=55;return {x:w/2+(p.x-state.sp.x)*scale, y:h/2-(p.y-state.sp.y)*scale};}
+function perspHorizonY(w,h){ return Math.max(80, Math.min(h-90, h*.50 - (state.sp.y-3.2)*22)); }
+function mapPers(p,w,h){const scale=42;const hy=perspHorizonY(w,h);return {x:w/2+p.x*scale, y:hy-(p.y-state.sp.y)*scale};}
 function mapPlan(p,w,h){const s=32;return {x:w/2+p.x*s,y:h*.68-p.z*s};}
 function mapElev(p,w,h){const s=32;return {x:w/2+p.x*s,y:h*.26-p.y*s};}
 function dirVP(dx,dz,dy=0){ if(Math.abs(dz)<.001)return null; const t=(state.pp-state.sp.z)/dz; return {x:state.sp.x+t*dx,y:state.sp.y+t*dy}; }
@@ -54,8 +55,8 @@ function drawPerspective(){
  const ctx=ctxs.perspective,w=perspective.clientWidth,h=perspective.clientHeight;clear(ctx,w,h);
  if(state.show.grid)perspGrid(ctx,w,h);
  const pts=objectPoints(); let pr=pts.map(p=>mapPers(project(p),w,h)); pr=applyThreePoint(pr,w,h);
- const horizon=mapPers({x:0,y:state.sp.y},w,h).y;
- const ground=h*.82;
+ const horizon=perspHorizonY(w,h);
+ const ground=Math.max(horizon+80, h*.78);
  line(ctx,0,horizon,w,horizon,C.yellow,1.5); label(ctx,12,horizon-7,'HL  horizon line',C.yellow);
  line(ctx,0,ground,w,ground,C.muted,1.2); label(ctx,12,ground-7,'GL  ground line',C.muted);
  if(state.show.cone){ctx.fillStyle='rgba(255,107,107,.09)';ctx.fillRect(0,0,w*.15,h);ctx.fillRect(w*.85,0,w*.15,h);label(ctx,w*.02,24,'distortion outside cone',C.red);label(ctx,w*.75,24,'distortion outside cone',C.red)}
@@ -63,12 +64,12 @@ function drawPerspective(){
  const r=modeRot()*Math.PI/180;
  const vps = state.mode==='one' ? [dirVP(0,1)] : [dirVP(Math.cos(r),Math.sin(r)),dirVP(-Math.sin(r),Math.cos(r))];
  vps.forEach((v,i)=>{if(v){const m=mapPers(v,w,h);line(ctx,m.x,horizon-25,m.x,horizon+25,C.green);dot(ctx,m.x,horizon,5,C.green,'VP'+(i+1))}});
- if(state.mode==='three'){const vp3={x:w/2+95,y:-22}; dot(ctx,vp3.x,vp3.y,5,C.purple,'VP3'); pr.slice(0,8).forEach(p=>line(ctx,p.x,p.y,vp3.x,vp3.y,C.purple,.45));}
+ if(state.mode==='three'){const vp3={x:w/2+95,y:28}; dot(ctx,vp3.x,vp3.y,5,C.purple,'VP3'); pr.slice(0,8).forEach(p=>line(ctx,p.x,p.y,vp3.x,vp3.y,C.purple,.45));}
  if(state.mode!=='one'){const aux=dirVP(Math.cos(r),Math.sin(r),.7); if(aux){const m=mapPers(aux,w,h);dot(ctx,m.x,m.y,5,C.purple,'AVP');line(ctx,m.x,horizon,m.x,m.y,C.purple)}}
  if(state.show.parallel){ctx.globalAlpha=.55;const flat=pts.map(p=>({x:w*.78+(p.x-state.obj.x)*42,y:h*.72-p.y*42-p.z*4}));drawObj(ctx,flat,C.orange);label(ctx,w*.68,h*.88,'parallel projection comparison',C.orange);ctx.globalAlpha=1}
  label(ctx,12,h-16, state.mode==='one'?'One-point mode: depth lines converge to a single VP.':state.mode==='two'?'Two-point mode: two horizontal directions converge to VP1 and VP2.':'Three-point mode: verticals also converge to VP3.',C.muted);
 }
-function perspGrid(ctx,w,h){const hy=mapPers({x:0,y:state.sp.y},w,h).y; for(let i=0;i<18;i++){let x=w/2+(i-9)*35; line(ctx,x,h,x+(w/2-x)*.96,hy,C.grid)} for(let j=0;j<10;j++){let y=hy+(h-hy)*(j/10)**1.7;line(ctx,0,y,w,y,C.grid)}}
+function perspGrid(ctx,w,h){const hy=perspHorizonY(w,h); for(let i=0;i<18;i++){let x=w/2+(i-9)*35; line(ctx,x,h,x+(w/2-x)*.96,hy,C.grid)} for(let j=0;j<10;j++){let y=hy+(h-hy)*(j/10)**1.7;line(ctx,0,y,w,y,C.grid)}}
 function drawConstruction(){const ctx=ctxs.construction,w=construction.clientWidth,h=construction.clientHeight;clear(ctx,w,h); if(state.show.grid)drawGrid(ctx,w,h); label(ctx,14,20,'PLAN',C.text); label(ctx,14,h*.5+20,'ELEVATION',C.text); const ppA=mapPlan({x:-9,z:state.pp},w,h), ppB=mapPlan({x:9,z:state.pp},w,h); line(ctx,ppA.x,ppA.y,ppB.x,ppB.y,C.ray,2); label(ctx,ppA.x+8,ppA.y-7,'picture plane',C.ray); const hl=mapElev({x:0,y:state.sp.y},w,h); line(ctx,0,hl.y,w,hl.y,C.yellow,1.5); label(ctx,12,hl.y-7,'horizon = eye level',C.yellow); const sp=mapPlan(state.sp,w,h); dot(ctx,sp.x,sp.y,7,C.orange,'SP'); const pts=objectPoints(); const plan=pts.slice(0,8).map(p=>mapPlan(p,w,h)), elev=pts.slice(0,8).map(p=>mapElev(p,w,h)); drawObj(ctx,plan); drawObj(ctx,elev,C.muted); if(state.show.rays)pts.slice(0,8).forEach(p=>{const a=mapPlan(p,w,h), q=mapPlan(project(p),w,h);line(ctx,sp.x,sp.y,a.x,a.y,C.ray,.8);dot(ctx,q.x,q.y,2.8,C.white)}); const r=state.obj.rot*Math.PI/180, v1=dirVP(Math.cos(r),Math.sin(r)); if(v1){const m=mapPers(v1,w,h); label(ctx,w-220,28,`dynamic VP1 on HL: x=${m.x.toFixed(0)} px`,C.green)} drawStep(ctx,w,h); updateReadouts();}
 function drawStep(ctx,w,h){
  const messages={one:'One-point perspective active: the object faces the picture plane, so receding depth edges share one vanishing point.',two:'Two-point perspective active: rotate the object so the two main horizontal edge sets vanish left and right.',three:'Three-point perspective active: vertical edges are tilted to converge to a third vanishing point.'};
