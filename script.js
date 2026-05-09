@@ -3,7 +3,6 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 const threeView = document.getElementById("threeView");
 const solidType = document.getElementById("solidType");
-const rotation = document.getElementById("rotation");
 const hiddenToggle = document.getElementById("hiddenToggle");
 const sectionToggle = document.getElementById("sectionToggle");
 const quizToggle = document.getElementById("quizToggle");
@@ -94,7 +93,6 @@ function createSolid() {
   }
 
   solid = new THREE.Mesh(geometry, material);
-  solid.rotation.y = THREE.MathUtils.degToRad(Number(rotation.value));
   scene.add(solid);
 
   const edges = new THREE.EdgesGeometry(geometry);
@@ -151,7 +149,7 @@ function drawView(canvas, view) {
   ctx.fillStyle = "#eff6ff";
 
   if (constructionStep >= 1) {
-    if (solidType.value === "cube") drawRect(ctx, cx, cy, 120, 90);
+    if (solidType.value === "cube") drawRect(ctx, cx, cy, 100, 100);
     if (solidType.value === "cylinder") drawCylinderProjection(ctx, cx, cy, view);
     if (solidType.value === "cone") drawConeProjection(ctx, cx, cy, view);
     if (solidType.value === "prism") drawPrismProjection(ctx, cx, cy, view);
@@ -246,17 +244,17 @@ function drawHiddenDetail(ctx, cx, cy, view) {
 }
 
 function drawSectionLine(ctx, cx, cy, view) {
+  ctx.beginPath();
+
   if (view === "plan") {
-    ctx.beginPath();
-    ctx.moveTo(cx - 70, cy - 35);
-    ctx.lineTo(cx + 70, cy + 35);
-    ctx.stroke();
+    ctx.moveTo(cx, cy - 65);
+    ctx.lineTo(cx, cy + 65);
   } else {
-    ctx.beginPath();
     ctx.moveTo(cx - 70, cy);
     ctx.lineTo(cx + 70, cy);
-    ctx.stroke();
   }
+
+  ctx.stroke();
 }
 
 function refresh() {
@@ -266,12 +264,7 @@ function refresh() {
 
 solidType.addEventListener("change", refresh);
 
-rotation.addEventListener("input", () => {
-  if (solid) {
-    solid.rotation.y = THREE.MathUtils.degToRad(Number(rotation.value));
-  }
-  drawProjections();
-});
+
 
 hiddenToggle.addEventListener("change", drawProjections);
 
@@ -286,7 +279,6 @@ quizToggle.addEventListener("change", () => {
 
 document.getElementById("resetBtn").addEventListener("click", () => {
   solidType.value = "cube";
-  rotation.value = 25;
   hiddenToggle.checked = true;
   sectionToggle.checked = false;
   quizToggle.checked = false;
