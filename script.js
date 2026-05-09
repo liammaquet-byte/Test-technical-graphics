@@ -10,6 +10,7 @@ const quizToggle = document.getElementById("quizToggle");
 const quizPanel = document.getElementById("quizPanel");
 const quizFeedback = document.getElementById("quizFeedback");
 const statusEl = document.getElementById("status");
+const clipPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
 
 const canvases = {
   front: document.getElementById("frontCanvas"),
@@ -35,6 +36,7 @@ function init3D() {
   renderer.setSize(threeView.clientWidth, threeView.clientHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
   threeView.appendChild(renderer.domElement);
+  renderer.localClippingEnabled = true;
 
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -59,7 +61,8 @@ function createSolid() {
     roughness: 0.45,
     metalness: 0.05,
     transparent: true,
-    opacity: sectionToggle.checked ? 0.72 : 1
+    opacity: sectionToggle.checked ? 0.72 : 1,
+    clippingPlanes: sectionToggle.checked ? [clipPlane] : []
   });
 
   let geometry;
@@ -272,7 +275,10 @@ rotation.addEventListener("input", () => {
 
 hiddenToggle.addEventListener("change", drawProjections);
 
-sectionToggle.addEventListener("change", refresh);
+sectionToggle.addEventListener("change", () => {
+  createSolid();
+  drawProjections();
+});
 
 quizToggle.addEventListener("change", () => {
   quizPanel.hidden = !quizToggle.checked;
