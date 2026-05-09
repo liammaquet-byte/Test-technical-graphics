@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perspective Projection Laboratory</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div>
+        <h1>Perspective Projection Laboratory</h1>
+        <p>Engineering graphics & design communication workspace</p>
+      </div>
+      <div class="mode-tabs" role="group" aria-label="Perspective mode">
+        <button class="seg active" data-mode="one">One-point</button>
+        <button class="seg" data-mode="two">Two-point</button>
+        <button class="seg" data-mode="three">Three-point</button>
+      </div>
+    </header>
+
+    <aside class="panel controls">
+      <section>
+        <h2>Scene controls</h2>
+        <label>Station point X <input id="spx" type="range" min="-9" max="9" step="0.1"></label>
+        <label>Station point Z <input id="spz" type="range" min="-12" max="2" step="0.1"></label>
+        <label>Eye / horizon height <input id="eye" type="range" min="1" max="7" step="0.1"></label>
+        <label>Picture plane position <input id="pp" type="range" min="-4" max="7" step="0.1"></label>
+        <label>Object rotation <input id="rot" type="range" min="-80" max="80" step="1"></label>
+        <label>Object X <input id="objx" type="range" min="-5" max="5" step="0.1"></label>
+        <label>Object Z <input id="objz" type="range" min="1" max="12" step="0.1"></label>
+      </section>
+      <section>
+        <h2>Visibility</h2>
+        <label class="check"><input id="rays" type="checkbox" checked> Projection rays</label>
+        <label class="check"><input id="construct" type="checkbox" checked> Construction lines</label>
+        <label class="check"><input id="grid" type="checkbox" checked> Perspective grid</label>
+        <label class="check"><input id="cone" type="checkbox" checked> Cone of vision</label>
+        <label class="check"><input id="parallel" type="checkbox"> Parallel projection comparison</label>
+        <label class="check"><input id="curves" type="checkbox" checked> Curved / inclined surfaces</label>
+      </section>
+      <section>
+        <h2>Learning tools</h2>
+        <button id="stepBtn" class="wide">Start step-by-step construction</button>
+        <button id="explainBtn" class="wide active">Explain this line: ON</button>
+        <button id="resetBtn" class="wide">Reset laboratory</button>
+        <div id="feedback" class="feedback">Drag the station point in plan or adjust controls to observe vanishing point movement.</div>
+      </section>
+    </aside>
+
+    <main class="workspace">
+      <section class="viewport" id="scenePanel">
+        <div class="viewport-title">3D scene view <span>orbit-style axonometric</span></div>
+        <canvas id="scene"></canvas>
+      </section>
+      <section class="viewport" id="perspectivePanel">
+        <div class="viewport-title">Perspective projection view <span>picture plane image</span></div>
+        <canvas id="perspective"></canvas>
+      </section>
+      <section class="viewport wide-panel" id="constructionPanel">
+        <div class="viewport-title">Plan / elevation construction workspace <span>drag station point + object</span></div>
+        <canvas id="construction"></canvas>
+      </section>
+    </main>
+
+    <aside class="panel inspector">
+      <h2>Geometric readout</h2>
+      <dl>
+        <dt>Station point</dt><dd id="readSP"></dd>
+        <dt>Picture plane</dt><dd id="readPP"></dd>
+        <dt>Horizon height</dt><dd id="readHL"></dd>
+        <dt>Vanishing points</dt><dd id="readVP"></dd>
+        <dt>Auxiliary VP</dt><dd id="readAux"></dd>
+        <dt>Measuring point</dt><dd id="readMP"></dd>
+      </dl>
+      <div class="lesson-card">
+        <h3 id="lessonTitle">Construction step</h3>
+        <p id="lessonText">Use the controls to investigate how the drawing changes. Hover over technical lines in the construction workspace for explanations.</p>
+      </div>
+      <div class="legend">
+        <span><i class="l horizon"></i> horizon</span>
+        <span><i class="l ray"></i> visual ray</span>
+        <span><i class="l vp"></i> vanishing point path</span>
+        <span><i class="l warn"></i> distortion zone</span>
+      </div>
+    </aside>
+  </div>
+
+  <div id="tooltip" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
