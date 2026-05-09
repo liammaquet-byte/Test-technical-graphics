@@ -11,7 +11,18 @@
   <div class="card">
     <h1>Technical Graphics Projection Lab</h1>
     <p>Explore 3D solids and see the front elevation, plan, and side elevation update instantly.</p>
-
+    
+    <div class="controls">
+      <div>
+        <label for="solidType">Solid</label>
+        <select id="solidType">
+          <option value="cube">Cube</option>
+          <option value="cylinder">Cylinder</option>
+          <option value="cone">Cone</option>
+          <option value="prism">Triangular Prism</option>
+        </select>
+      </div>
+      
     <div class="layout">
       <section class="viewer">
         <div id="threeView"></div>
@@ -35,16 +46,7 @@
       </section>
     </div>
 
-    <div class="controls">
-      <div>
-        <label for="solidType">Solid</label>
-        <select id="solidType">
-          <option value="cube">Cube</option>
-          <option value="cylinder">Cylinder</option>
-          <option value="cone">Cone</option>
-          <option value="prism">Triangular Prism</option>
-        </select>
-      </div>
+    
 
       <div>
         <label for="rotation">Rotation</label>
