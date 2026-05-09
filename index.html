@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Technical Graphics Projection Lab</title>
+  <meta name="description" content="Interactive orthographic projection tool for technical graphics students." />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="card">
+    <h1>Technical Graphics Projection Lab</h1>
+    <p>Explore 3D solids and see the front elevation, plan, and side elevation update instantly.</p>
+
+    <div class="layout">
+      <section class="viewer">
+        <div id="threeView"></div>
+      </section>
+
+      <section class="projections">
+        <div class="projectionBox">
+          <strong>Front Elevation</strong>
+          <canvas id="frontCanvas" width="260" height="180"></canvas>
+        </div>
+
+        <div class="projectionBox">
+          <strong>Plan</strong>
+          <canvas id="planCanvas" width="260" height="180"></canvas>
+        </div>
+
+        <div class="projectionBox">
+          <strong>Side Elevation</strong>
+          <canvas id="sideCanvas" width="260" height="180"></canvas>
+        </div>
+      </section>
+    </div>
+
+    <div class="controls">
+      <div>
+        <label for="solidType">Solid</label>
+        <select id="solidType">
+          <option value="cube">Cube</option>
+          <option value="cylinder">Cylinder</option>
+          <option value="cone">Cone</option>
+          <option value="prism">Triangular Prism</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="rotation">Rotation</label>
+        <input id="rotation" type="range" min="0" max="360" value="25" />
+      </div>
+
+      <div class="checkRow">
+        <label><input id="hiddenToggle" type="checkbox" checked /> Hidden detail</label>
+        <label><input id="sectionToggle" type="checkbox" /> Section view</label>
+        <label><input id="quizToggle" type="checkbox" /> Quiz mode</label>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="animateBtn">Animate Construction</button>
+      <button id="resetBtn" class="secondary">Reset</button>
+    </div>
+
+    <div id="quizPanel" class="quizPanel" hidden>
+      <strong>Quiz Mode</strong>
+      <p id="quizQuestion">Which 2D view shows the object from above?</p>
+      <div class="actions">
+        <button class="secondary quizAnswer" data-answer="front">Front Elevation</button>
+        <button class="secondary quizAnswer" data-answer="plan">Plan</button>
+        <button class="secondary quizAnswer" data-answer="side">Side Elevation</button>
+      </div>
+      <div id="quizFeedback" class="status"></div>
+    </div>
+
+    <div id="status" class="status">Drag the 3D view to rotate the solid.</div>
+  </div>
+
+  <script type="module" src="./script.js"></script>
+</body>
+</html>
